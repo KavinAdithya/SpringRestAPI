@@ -36,7 +36,11 @@ public class UserDaoManage {
 		
 		return users.stream()
 					.filter(predicate)
-					.toList()
-					.getFirst();
+					.findFirst()
+					.orElse(null);
+	}
+	
+	public void deleteUserById(Integer id) {
+		users.removeIf(user -> user.getId() == id);
 	}
 }
