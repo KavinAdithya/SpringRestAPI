@@ -2,7 +2,9 @@ package com.techcrack.restfulWebService.socialmedia.service;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Optional;
 
+import org.jboss.logging.Logger;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
@@ -16,7 +18,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import com.techcrack.restfulWebService.socialmedia.data.UserDaoManage;
+import com.techcrack.restfulWebService.socialmedia.data.UserRepository;
 import com.techcrack.restfulWebService.socialmedia.entity.User;
 import com.techcrack.restfulWebService.socialmedia.exception.UserNotFoundException;
 
@@ -24,31 +26,36 @@ import jakarta.validation.Valid;
 
 @RestController
 public class UserController {
-	private UserDaoManage manage;
+	private UserRepository manage;
 	
-	public UserController(UserDaoManage manage) {
+	public UserController(UserRepository manage) {
 		this.manage = manage;
 	}
 	
 	@GetMapping("/users")
 	@ResponseStatus(HttpStatus.OK)
 	public List<User> getAllUsers() {
-		return manage.findAllUser();
+//		return manage.
+
+		return manage.findAll();
 	}
 	
+	@SuppressWarnings("deprecation")
 	@GetMapping("/users/{id}")
 	public EntityModel<User> getUser(@PathVariable Integer id) {
-		User user = manage.findOne(id);
+		Optional<User> user = manage.findById(id);
+		
+		Logger.getLogger(getClass()).debug( user + " " + " founded");
 		
 		if (user == null) {
 			throw new UserNotFoundException("User ID " + id + " Not Found");
 		}
 		
-		EntityModel<User> entityModel = EntityModel.of(user);
+		EntityModel<User> entityModel = EntityModel.of(user.get());
 		
 		WebMvcLinkBuilder allUsers = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(this.getClass()).getAllUsers());
 		
-		WebMvcLinkBuilder userUnique = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(getClass()).getUser(id));
+		WebMvcLinkBuilder userUnique = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(this.getClass()).getUser(id));
 		
 		entityModel.add(allUsers.withRel("all-users"));
 		entityModel.add(userUnique.withRel("User with id " + id));
@@ -58,7 +65,7 @@ public class UserController {
 	
 	@PostMapping("/users")
 	public ResponseEntity<User> saveUser(@Valid @RequestBody User user) {
-		User savedUser = manage.saveUser(user);
+		User savedUser = manage.save(user);
 	
 		URI location = ServletUriComponentsBuilder
 							.fromCurrentRequest()
@@ -71,6 +78,6 @@ public class UserController {
 	
 	@DeleteMapping("users/{id}")
 	public void deleteUser(@PathVariable Integer id) {
-		manage.deleteUserById(id);
+		manage.deleteById(id);
 	}
 }	
