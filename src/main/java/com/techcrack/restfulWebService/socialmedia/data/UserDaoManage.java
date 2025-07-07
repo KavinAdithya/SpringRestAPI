@@ -15,9 +15,9 @@ public class UserDaoManage {
 	private static int userCount = 0;
 	
 	static {
-		users.add(new User(++userCount, "James Clear", LocalDate.now().minusYears(18)));
-		users.add(new User(++userCount, "James Gosling", LocalDate.now().minusYears(20)));
-		users.add(new User(++userCount, "Robert T Kiyosaki", LocalDate.now().minusYears(40)));
+		users.add(new User(++userCount, "James Clear", LocalDate.now().minusYears(18), null));
+		users.add(new User(++userCount, "James Gosling", LocalDate.now().minusYears(20), null));
+		users.add(new User(++userCount, "Robert T Kiyosaki", LocalDate.now().minusYears(40), null));
 	}
 	
 	public List<User> findAllUser() {

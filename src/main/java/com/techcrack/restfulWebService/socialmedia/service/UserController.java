@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.techcrack.restfulWebService.socialmedia.data.UserRepository;
+import com.techcrack.restfulWebService.socialmedia.entity.Post;
 import com.techcrack.restfulWebService.socialmedia.entity.User;
 import com.techcrack.restfulWebService.socialmedia.exception.UserNotFoundException;
 
@@ -35,17 +36,15 @@ public class UserController {
 	@GetMapping("/users")
 	@ResponseStatus(HttpStatus.OK)
 	public List<User> getAllUsers() {
-//		return manage.
-
+		
 		return manage.findAll();
 	}
-	
-	@SuppressWarnings("deprecation")
+
 	@GetMapping("/users/{id}")
 	public EntityModel<User> getUser(@PathVariable Integer id) {
 		Optional<User> user = manage.findById(id);
 		
-		Logger.getLogger(getClass()).debug( user + " " + " founded");
+		Logger.getLogger(getClass()).warn( user + " " + " founded");
 		
 		if (user == null) {
 			throw new UserNotFoundException("User ID " + id + " Not Found");
@@ -65,7 +64,15 @@ public class UserController {
 	
 	@PostMapping("/users")
 	public ResponseEntity<User> saveUser(@Valid @RequestBody User user) {
+		List<Post> posts = user.getPosts();
+		
+		for (Post p : posts) {
+			p.setUser(user);
+			
+		}
 		User savedUser = manage.save(user);
+		
+		Logger.getLogger(getClass()).warn(savedUser + " " + user);
 	
 		URI location = ServletUriComponentsBuilder
 							.fromCurrentRequest()
